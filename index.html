@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Java Web Programming – Dini Nurul Fauziah</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Georgia,serif;background:#fdf4f8;color:#3a1a2e;min-height:100vh}
+
+.site-header{background:linear-gradient(135deg,#fff0f5,#ffd6e8,#ffb8d2);border-bottom:2px solid #ffb8d2;padding:0 28px;height:70px;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(220,100,150,.15)}
+.header-inner{max-width:1400px;margin:0 auto;height:100%;display:flex;align-items:center;justify-content:space-between}
+.header-identity{display:flex;align-items:center;gap:14px}
+.header-avatar{width:44px;height:44px;background:#ffb8d2;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid #ff8ab5;flex-shrink:0}
+.header-name{font-size:1.15rem;font-weight:700;color:#c23068;line-height:1.2}
+.header-meta{font-size:.78rem;color:#7a4060}
+.btn-add-main{background:linear-gradient(135deg,#f4608f,#e0437a);color:#fff;border:none;padding:10px 22px;border-radius:50px;font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(224,67,122,.35);transition:all .2s;white-space:nowrap}
+.btn-add-main:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(224,67,122,.45)}
+
+.layout{display:flex;max-width:1400px;margin:0 auto;min-height:calc(100vh - 70px)}
+
+.sidebar{width:250px;min-width:220px;background:#fff5f9;border-right:1.5px solid #f0c8dc;padding:16px 0 40px;overflow-y:auto;height:calc(100vh - 70px);position:sticky;top:70px;flex-shrink:0}
+.sidebar-title{font-size:.9rem;font-weight:700;color:#c23068;padding:0 16px 12px;border-bottom:1px solid #f0c8dc;margin-bottom:6px}
+.sidebar-nav{display:flex;flex-direction:column}
+.pgroup-header{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;cursor:pointer;font-size:.82rem;font-weight:600;color:#7a4060;border-left:3px solid transparent;transition:all .15s;user-select:none}
+.pgroup-header:hover,.pgroup-header.open{background:#ffe0ec;color:#c23068;border-left-color:#f4608f}
+.pgroup-arrow{font-size:.65rem;transition:transform .2s;display:inline-block}
+.pgroup-header.open .pgroup-arrow{transform:rotate(90deg)}
+.pgroup-items{display:none;flex-direction:column}
+.pgroup-header.open + .pgroup-items{display:flex}
+.pitem{padding:6px 16px 6px 30px;font-size:.78rem;color:#b07090;cursor:pointer;border-left:3px solid transparent;transition:all .15s}
+.pitem:hover{background:#fff0f5;color:#e0437a}
+.pitem.active{background:#ffe0ec;color:#c23068;font-weight:600;border-left-color:#f4608f}
+
+.main-content{flex:1;padding:22px 26px;min-width:0}
+.breadcrumb{font-size:.82rem;color:#b07090;margin-bottom:16px;padding:8px 14px;background:#fff0f5;border-radius:8px;border:1px solid #f0c8dc}
+
+.preview-bar{background:#fff;border:1.5px solid #f0c8dc;border-radius:16px;margin-bottom:22px;overflow:hidden;box-shadow:0 4px 24px rgba(200,80,130,.10)}
+.preview-header{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:linear-gradient(90deg,#fff0f5,#fff8fc);border-bottom:1px solid #f0c8dc;gap:8px;flex-wrap:wrap}
+.preview-title{font-weight:600;color:#c23068;font-size:.88rem;flex:1;min-width:100px}
+.preview-tabs{display:flex;gap:5px;flex-wrap:wrap}
+.ptab{padding:5px 13px;border-radius:20px;border:1.5px solid #f0c8dc;background:#fff;font-size:.78rem;font-weight:500;color:#7a4060;cursor:pointer;font-family:inherit;transition:all .15s}
+.ptab.active,.ptab:hover{background:#f4608f;color:#fff;border-color:#f4608f}
+.btn-close-preview{background:none;border:none;color:#b07090;font-size:1rem;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .15s}
+.btn-close-preview:hover{background:#ffe0ec;color:#c23068}
+.preview-body{height:380px;overflow:hidden;position:relative}
+#previewFrame{width:100%;height:100%;border:none;background:#fff;display:block}
+.code-view{height:100%;overflow:auto;padding:18px;background:#2d1420;color:#ffb8d2;font-family:'Courier New',monospace;font-size:.8rem;line-height:1.7;white-space:pre-wrap;word-break:break-word;display:none}
+.screenshot-view{height:100%;overflow-y:auto;background:#fdf4f8;display:none;align-items:center;justify-content:center;padding:18px}
+.ss-upload-area{border:2.5px dashed #ff8ab5;border-radius:14px;background:#fff0f5;padding:40px 28px;text-align:center;cursor:pointer;transition:all .2s;max-width:400px;width:100%}
+.ss-upload-area:hover,.ss-upload-area.drag-over{border-color:#f4608f;background:#ffe0ec;transform:scale(1.01)}
+.ss-upload-icon{font-size:2.6rem;margin-bottom:10px}
+.ss-upload-text{font-size:.9rem;font-weight:600;color:#7a4060;margin-bottom:5px}
+.ss-upload-sub{font-size:.74rem;color:#b07090}
+.ss-image-wrap{display:none;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:680px}
+.ss-image-wrap img{width:100%;max-height:300px;object-fit:contain;border-radius:14px;border:2px solid #f0c8dc;box-shadow:0 8px 32px rgba(200,80,130,.16);background:#fff}
+.ss-image-actions{display:flex;gap:10px}
+.ss-btn{padding:7px 18px;border-radius:50px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;border:1.5px solid;transition:all .15s}
+.ss-btn-change{background:#fff;color:#e0437a;border-color:#ff8ab5}
+.ss-btn-change:hover{background:#f4608f;color:#fff;border-color:#f4608f}
+.ss-btn-del{background:#fff;color:#c23068;border-color:#ffb8d2}
+.ss-btn-del:hover{background:#c23068;color:#fff}
+
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.empty-state{grid-column:1/-1;text-align:center;padding:70px 20px;color:#b07090}
+.empty-icon{font-size:3rem;margin-bottom:14px}
+.code-card{background:#fff8fb;border:1.5px solid #f0c8dc;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(200,80,130,.10);transition:all .2s;display:flex;flex-direction:column}
+.code-card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(200,80,130,.16);border-color:#ff8ab5}
+.card-thumb{width:100%;height:100px;object-fit:cover;border-bottom:1px solid #f0c8dc;display:none}
+.card-has-ss .card-thumb{display:block}
+.card-top{padding:14px 16px 8px;flex:1}
+.card-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700;letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase}
+.badge-html{background:#ffe0ec;color:#c23068}
+.badge-css{background:#e0eaff;color:#3060c2}
+.badge-js{background:#fff6cc;color:#a07000}
+.badge-php{background:#e8e0ff;color:#6030c2}
+.card-title{font-size:.95rem;font-weight:700;color:#3a1a2e;margin-bottom:4px;line-height:1.3}
+.card-desc{font-size:.78rem;color:#b07090;line-height:1.4}
+.card-code-preview{background:#2d1420;padding:9px 13px;font-family:'Courier New',monospace;font-size:.68rem;color:#ffb8d2;max-height:75px;overflow:hidden;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.card-actions{display:flex;gap:5px;padding:9px 12px 11px;border-top:1px solid #f0c8dc;background:#fff0f5}
+.btn-action{flex:1;padding:7px 3px;border-radius:10px;border:1.5px solid;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-preview{background:#fff;color:#e0437a;border-color:#ff8ab5}
+.btn-preview:hover{background:#f4608f;color:#fff;border-color:#f4608f}
+.btn-edit{background:#fff;color:#6030c2;border-color:#c8b0f0}
+.btn-edit:hover{background:#6030c2;color:#fff}
+.btn-delete{background:#fff;color:#c23068;border-color:#ffb8d2}
+.btn-delete:hover{background:#c23068;color:#fff}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(60,10,40,.4);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:#fff8fb;border-radius:20px;width:100%;max-width:600px;border:1.5px solid #ffb8d2;overflow:hidden;animation:popIn .25s cubic-bezier(.34,1.4,.64,1);box-shadow:0 20px 60px rgba(200,60,120,.2)}
+.modal-sm{max-width:360px}
+@keyframes popIn{from{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;background:linear-gradient(90deg,#ffe0ec,#fff5f9);border-bottom:1px solid #f0c8dc}
+.modal-header h2{font-size:1.05rem;color:#c23068}
+.modal-close{background:none;border:none;font-size:1rem;color:#b07090;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .15s}
+.modal-close:hover{background:#ffe0ec;color:#c23068}
+.modal-body{padding:18px 22px}
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:.78rem;font-weight:600;color:#7a4060;margin-bottom:4px}
+.form-row input,.form-row select,.form-row textarea{width:100%;padding:9px 13px;border:1.5px solid #f0c8dc;border-radius:10px;font-family:inherit;font-size:.86rem;color:#3a1a2e;background:#fff;outline:none;transition:border .15s}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:#f4608f;box-shadow:0 0 0 3px rgba(244,96,143,.12)}
+.form-row textarea{font-family:'Courier New',monospace;font-size:.78rem;resize:vertical;min-height:130px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:12px 22px 16px;border-top:1px solid #f0c8dc}
+.btn-cancel{padding:8px 20px;border-radius:50px;border:1.5px solid #f0c8dc;background:#fff;color:#7a4060;font-size:.86rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-cancel:hover{background:#fff0f5}
+.btn-save{padding:8px 24px;border-radius:50px;border:none;background:linear-gradient(135deg,#f4608f,#e0437a);color:#fff;font-size:.86rem;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(224,67,122,.35);transition:all .15s}
+.btn-save:hover{transform:translateY(-1px)}
+.btn-del-confirm{padding:8px 24px;border-radius:50px;border:none;background:linear-gradient(135deg,#f46090,#c23068);color:#fff;font-size:.86rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:#fff0f5}
+::-webkit-scrollbar-thumb{background:#ffb8d2;border-radius:10px}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-identity">
+      <div class="header-avatar">🌸</div>
+      <div>
+        <div class="header-name">Dini Nurul Fauziah</div>
+        <div class="header-meta">NIM: 241091750091 &nbsp;·&nbsp; Java Web Programming</div>
+      </div>
+    </div>
+    <button class="btn-add-main" id="openAddModal">+ Tambah Kode</button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-title">📚 Pertemuan</div>
+    <nav class="sidebar-nav" id="sidebarNav"></nav>
+  </aside>
+
+  <main class="main-content">
+    <div class="breadcrumb" id="breadcrumb">Pilih pertemuan &amp; sesi dari menu kiri</div>
+
+    <div class="preview-bar" id="previewBar" style="display:none">
+      <div class="preview-header">
+        <span class="preview-title" id="previewTitle">Preview</span>
+        <div class="preview-tabs">
+          <button class="ptab active" id="tabPreview">👁 Preview</button>
+          <button class="ptab" id="tabScreenshot">📸 Screenshot</button>
+          <button class="ptab" id="tabCode">💻 Kode</button>
+        </div>
+        <button class="btn-close-preview" id="closePreview">✕</button>
+      </div>
+      <div class="preview-body">
+        <iframe id="previewFrame" sandbox="allow-scripts allow-same-origin"></iframe>
+        <pre id="codeView" class="code-view"></pre>
+        <div id="screenshotView" class="screenshot-view">
+          <div class="ss-upload-area" id="ssUploadArea">
+            <div class="ss-upload-icon">📸</div>
+            <p class="ss-upload-text">Klik atau drag &amp; drop screenshot di sini</p>
+            <p class="ss-upload-sub">PNG · JPG · WEBP — maks 5MB</p>
+            <input type="file" id="ssFileInput" accept="image/*" style="display:none"/>
+          </div>
+          <div class="ss-image-wrap" id="ssImageWrap">
+            <img id="ssImage" src="" alt="Screenshot"/>
+            <div class="ss-image-actions">
+              <button class="ss-btn ss-btn-change" id="ssBtnChange">🔄 Ganti</button>
+              <button class="ss-btn ss-btn-del" id="ssBtnDel">🗑 Hapus</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-grid" id="cardGrid">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">🌸</div>
+        <p>Pilih pertemuan &amp; sesi, lalu tambahkan kode pertamamu!</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal Tambah/Edit -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Tambah Kode Baru</h2>
+      <button class="modal-close" id="closeModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row"><label>Pertemuan</label><select id="fPertemuan"></select></div>
+      <div class="form-row"><label>Sesi</label><select id="fSesi"></select></div>
+      <div class="form-row"><label>Judul</label><input type="text" id="fJudul" placeholder="Contoh: Hello World"/></div>
+      <div class="form-row"><label>Deskripsi</label><input type="text" id="fDeskripsi" placeholder="Singkat tentang kode ini"/></div>
+      <div class="form-row"><label>Tipe File</label>
+        <select id="fTipe">
+          <option value="html">HTML</option>
+          <option value="css">CSS</option>
+          <option value="js">JavaScript</option>
+          <option value="php">PHP</option>
+        </select>
+      </div>
+      <div class="form-row"><label>Kode</label><textarea id="fKode" rows="10" placeholder="Tulis atau paste kode kamu di sini..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="btnCancel">Batal</button>
+      <button class="btn-save" id="btnSave">💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Hapus -->
+<div class="modal-overlay" id="deleteOverlay">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2>Hapus Kode?</h2>
+      <button class="modal-close" id="closeDelete">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:#a05070;text-align:center;padding:8px 0">Kode ini akan dihapus permanen. Yakin?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="btnCancelDel">Batal</button>
+      <button class="btn-del-confirm" id="btnConfirmDel">🗑 Hapus</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONSTANTS ──────────────────────────────────────────
+const DB_KEY='jwp_dini_codes', SS_KEY='jwp_dini_ss';
+const P_COUNT=21, SESI=['Contoh','Latihan'], S_COUNT=10;
+
+// ── STORAGE ────────────────────────────────────────────
+const load=k=>{ try{ return JSON.parse(localStorage.getItem(k))||{}; }catch{ return {}; } };
+const loadArr=k=>{ try{ return JSON.parse(localStorage.getItem(k))||[]; }catch{ return []; } };
+let db=loadArr(DB_KEY), ss=load(SS_KEY);
+let editId=null, delId=null, selP=null, selS=null, previewId=null;
+const saveDB=()=>localStorage.setItem(DB_KEY,JSON.stringify(db));
+const saveSS=()=>localStorage.setItem(SS_KEY,JSON.stringify(ss));
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+// ── SIDEBAR ────────────────────────────────────────────
+function buildSidebar(){
+  const nav=document.getElementById('sidebarNav'); nav.innerHTML='';
+  for(let p=1;p<=P_COUNT;p++){
+    const g=document.createElement('div'); g.className='pgroup';
+    const h=document.createElement('div'); h.className='pgroup-header'; h.dataset.p=p;
+    h.innerHTML='<span>Pertemuan '+p+'</span><span class="pgroup-arrow">&#9654;</span>';
+    h.onclick=()=>{ const o=h.classList.contains('open'); document.querySelectorAll('.pgroup-header').forEach(x=>x.classList.remove('open')); if(!o)h.classList.add('open'); };
+    const items=document.createElement('div'); items.className='pgroup-items';
+    SESI.forEach(t=>{ for(let i=1;i<=S_COUNT;i++){
+      const el=document.createElement('div'); el.className='pitem';
+      el.textContent=t+' '+i; el.dataset.p=p; el.dataset.s=t+' '+i;
+      el.onclick=()=>{ document.querySelectorAll('.pitem').forEach(x=>x.classList.remove('active')); el.classList.add('active'); selP=p; selS=t+' '+i; document.getElementById('breadcrumb').textContent='📂 Pertemuan '+p+' › '+t+' '+i; closePreview(); renderCards(); };
+      items.appendChild(el);
+    }});
+    g.appendChild(h); g.appendChild(items); nav.appendChild(g);
+  }
+}
+
+// ── CARDS ──────────────────────────────────────────────
+function renderCards(){
+  const grid=document.getElementById('cardGrid'), empty=document.getElementById('emptyState');
+  grid.querySelectorAll('.code-card').forEach(c=>c.remove());
+  const list=db.filter(c=>c.p==selP&&c.s===selS);
+  if(!list.length){ empty.style.display='block'; return; }
+  empty.style.display='none';
+  list.forEach(item=>{
+    const card=document.createElement('div'); card.className='code-card'+(ss[item.id]?' card-has-ss':''); card.dataset.id=item.id;
+    card.innerHTML=(ss[item.id]?'<img class="card-thumb" src="'+ss[item.id]+'" alt="ss"/>':'')
+      +'<div class="card-top"><span class="card-badge badge-'+item.t+'">'+item.t.toUpperCase()+'</span>'
+      +'<div class="card-title">'+esc(item.judul)+'</div><div class="card-desc">'+esc(item.desc||'')+'</div></div>'
+      +'<pre class="card-code-preview">'+esc(item.kode.substring(0,150))+(item.kode.length>150?'…':'')+'</pre>'
+      +'<div class="card-actions"><button class="btn-action btn-preview">👁 Preview</button><button class="btn-action btn-edit">✏️ Edit</button><button class="btn-action btn-delete">🗑 Hapus</button></div>';
+    card.querySelector('.btn-preview').onclick=()=>openPreview(item.id);
+    card.querySelector('.btn-edit').onclick=()=>openEdit(item.id);
+    card.querySelector('.btn-delete').onclick=()=>{ delId=item.id; document.getElementById('deleteOverlay').classList.add('open'); };
+    grid.appendChild(card);
+  });
+}
+
+// ── PREVIEW ────────────────────────────────────────────
+function openPreview(id){
+  const item=db.find(c=>c.id===id); if(!item) return;
+  previewId=id;
+  document.getElementById('previewBar').style.display='block';
+  document.getElementById('previewTitle').textContent='Preview: '+item.judul;
+  showTab('preview',item);
+  document.getElementById('tabPreview').onclick=()=>showTab('preview',item);
+  document.getElementById('tabScreenshot').onclick=()=>showTab('screenshot',item);
+  document.getElementById('tabCode').onclick=()=>showTab('code',item);
+  document.getElementById('previewBar').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function showTab(tab,item){
+  const frame=document.getElementById('previewFrame');
+  const cv=document.getElementById('codeView');
+  const sv=document.getElementById('screenshotView');
+  frame.style.display='none'; cv.style.display='none'; sv.style.display='none';
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  if(tab==='preview'){
+    document.getElementById('tabPreview').classList.add('active');
+    frame.style.display='block';
+    let c=item.kode;
+    if(item.t==='css') c='<style>'+item.kode+'</style><div style="padding:20px;font-family:sans-serif;color:#555">CSS dimuat.</div>';
+    else if(item.t==='js') c='<script>'+item.kode+'<\/script><div style="padding:20px;font-family:sans-serif;color:#555">Buka DevTools Console (F12) untuk output JS.</div>';
+    else if(item.t==='php'){ frame.srcdoc=phpLoad(); simPHP(item.kode,frame); return; }
+    frame.srcdoc=c;
+  } else if(tab==='screenshot'){
+    document.getElementById('tabScreenshot').classList.add('active');
+    sv.style.display='flex'; renderSS(item.id);
+  } else {
+    document.getElementById('tabCode').classList.add('active');
+    cv.style.display='block'; cv.textContent=item.kode;
+  }
+}
+function closePreview(){ document.getElementById('previewBar').style.display='none'; document.getElementById('previewFrame').srcdoc=''; }
+document.getElementById('closePreview').onclick=closePreview;
+
+// ── SCREENSHOT ─────────────────────────────────────────
+function renderSS(id){
+  const img=ss[id];
+  document.getElementById('ssUploadArea').style.display=img?'none':'block';
+  document.getElementById('ssImageWrap').style.display=img?'flex':'none';
+  if(img) document.getElementById('ssImage').src=img;
+}
+function handleFile(file){
+  if(!file||!file.type.startsWith('image/')){ alert('Pilih file gambar!'); return; }
+  if(file.size>5*1024*1024){ alert('Ukuran maks 5MB!'); return; }
+  const r=new FileReader();
+  r.onload=e=>{
+    ss[previewId]=e.target.result; saveSS();
+    document.getElementById('ssImage').src=e.target.result;
+    document.getElementById('ssUploadArea').style.display='none';
+    document.getElementById('ssImageWrap').style.display='flex';
+    const card=document.querySelector('.code-card[data-id="'+previewId+'"]');
+    if(card){ let th=card.querySelector('.card-thumb'); if(!th){th=document.createElement('img');th.className='card-thumb';th.alt='ss';card.insertBefore(th,card.firstChild);} th.src=e.target.result; card.classList.add('card-has-ss'); }
+  };
+  r.readAsDataURL(file);
+}
+document.getElementById('ssUploadArea').onclick=()=>document.getElementById('ssFileInput').click();
+document.getElementById('ssFileInput').onchange=e=>{ handleFile(e.target.files[0]); e.target.value=''; };
+const ua=document.getElementById('ssUploadArea');
+ua.addEventListener('dragover',e=>{ e.preventDefault(); ua.classList.add('drag-over'); });
+ua.addEventListener('dragleave',()=>ua.classList.remove('drag-over'));
+ua.addEventListener('drop',e=>{ e.preventDefault(); ua.classList.remove('drag-over'); handleFile(e.dataTransfer.files[0]); });
+document.getElementById('ssBtnChange').onclick=()=>document.getElementById('ssFileInput').click();
+document.getElementById('ssBtnDel').onclick=()=>{
+  if(!previewId) return;
+  delete ss[previewId]; saveSS();
+  document.getElementById('ssUploadArea').style.display='block';
+  document.getElementById('ssImageWrap').style.display='none';
+  const card=document.querySelector('.code-card[data-id="'+previewId+'"]');
+  if(card){ const th=card.querySelector('.card-thumb'); if(th)th.remove(); card.classList.remove('card-has-ss'); }
+};
+
+// ── PHP SIMULATE ───────────────────────────────────────
+function phpLoad(){ return '<!DOCTYPE html><html><head><style>body{margin:0;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;background:#fff8fb;flex-direction:column;gap:14px}.sp{width:36px;height:36px;border:4px solid #ffd6e8;border-top-color:#e0437a;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}p{color:#c23068;font-size:.9rem}</style></head><body><div class="sp"></div><p>Mensimulasikan output PHP...</p></body></html>'; }
+async function simPHP(code,frame){
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:'Kamu PHP interpreter simulator. Kembalikan HANYA HTML output dari kode PHP. Tanpa penjelasan apapun.',messages:[{role:'user',content:'Simulasikan output:\n'+code}]})});
+    const data=await res.json();
+    const txt=data.content?.map(b=>b.text||'').join('')||'';
+    const clean=txt.replace(/^```html\n?/i,'').replace(/\n?```$/i,'').trim();
+    frame.srcdoc=/<!DOCTYPE|<html/i.test(clean)?clean:'<!DOCTYPE html><html><head><meta charset="UTF-8"/><style>body{font-family:sans-serif;padding:20px;line-height:1.6;color:#333}.lbl{display:inline-block;background:#e8e0ff;color:#6030c2;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:14px}</style></head><body><div class="lbl">PHP OUTPUT (SIMULASI AI)</div><div>'+clean+'</div></body></html>';
+  }catch(e){ frame.srcdoc='<body style="font-family:sans-serif;padding:24px;color:#c23068"><b>Simulasi gagal.</b><br>Buka via Live Server.<br>'+e.message+'</body>'; }
+}
+
+// ── MODAL FORM ─────────────────────────────────────────
+function buildForm(){
+  const sp=document.getElementById('fPertemuan'); sp.innerHTML='';
+  for(let i=1;i<=P_COUNT;i++){ const o=document.createElement('option'); o.value=i; o.textContent='Pertemuan '+i; sp.appendChild(o); }
+  sp.onchange=buildSesiSelect; buildSesiSelect();
+}
+function buildSesiSelect(){
+  const ss2=document.getElementById('fSesi'); ss2.innerHTML='';
+  SESI.forEach(t=>{ for(let i=1;i<=S_COUNT;i++){ const o=document.createElement('option'); o.value=t+' '+i; o.textContent=t+' '+i; ss2.appendChild(o); } });
+}
+function openAdd(){
+  editId=null; document.getElementById('modalTitle').textContent='Tambah Kode Baru';
+  ['fJudul','fDeskripsi','fKode'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fTipe').value='html';
+  if(selP){ document.getElementById('fPertemuan').value=selP; buildSesiSelect(); }
+  if(selS) document.getElementById('fSesi').value=selS;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function openEdit(id){
+  const item=db.find(c=>c.id===id); if(!item) return;
+  editId=id; document.getElementById('modalTitle').textContent='Edit Kode';
+  document.getElementById('fPertemuan').value=item.p; buildSesiSelect();
+  document.getElementById('fSesi').value=item.s;
+  document.getElementById('fJudul').value=item.judul;
+  document.getElementById('fDeskripsi').value=item.desc||'';
+  document.getElementById('fTipe').value=item.t;
+  document.getElementById('fKode').value=item.kode;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); }
+function saveCode(){
+  const judul=document.getElementById('fJudul').value.trim(), kode=document.getElementById('fKode').value.trim();
+  if(!judul){ alert('Judul tidak boleh kosong!'); return; }
+  if(!kode){ alert('Kode tidak boleh kosong!'); return; }
+  const data={ p:parseInt(document.getElementById('fPertemuan').value), s:document.getElementById('fSesi').value, judul, desc:document.getElementById('fDeskripsi').value.trim(), t:document.getElementById('fTipe').value, kode };
+  if(editId){ const i=db.findIndex(c=>c.id===editId); if(i>-1) db[i]={...db[i],...data}; }
+  else{ data.id=Date.now().toString(); db.push(data); }
+  saveDB(); closeModal(); closePreview();
+  selP=data.p; selS=data.s;
+  document.getElementById('breadcrumb').textContent='📂 Pertemuan '+data.p+' › '+data.s;
+  document.querySelectorAll('.pgroup-header').forEach(h=>h.classList.remove('open'));
+  const hdr=document.querySelector('.pgroup-header[data-p="'+data.p+'"]'); if(hdr) hdr.classList.add('open');
+  document.querySelectorAll('.pitem').forEach(i=>i.classList.remove('active'));
+  const ai=document.querySelector('.pitem[data-p="'+data.p+'"][data-s="'+data.s+'"]'); if(ai) ai.classList.add('active');
+  renderCards();
+}
+
+// ── EVENTS ─────────────────────────────────────────────
+document.getElementById('openAddModal').onclick=openAdd;
+document.getElementById('closeModal').onclick=closeModal;
+document.getElementById('btnCancel').onclick=closeModal;
+document.getElementById('btnSave').onclick=saveCode;
+document.getElementById('closeDelete').onclick=()=>{ document.getElementById('deleteOverlay').classList.remove('open'); delId=null; };
+document.getElementById('btnCancelDel').onclick=()=>{ document.getElementById('deleteOverlay').classList.remove('open'); delId=null; };
+document.getElementById('btnConfirmDel').onclick=()=>{
+  if(!delId) return;
+  db=db.filter(c=>c.id!==delId); saveDB();
+  document.getElementById('deleteOverlay').classList.remove('open'); delId=null;
+  closePreview(); renderCards();
+};
+document.getElementById('modalOverlay').onclick=e=>{ if(e.target===document.getElementById('modalOverlay')) closeModal(); };
+document.getElementById('deleteOverlay').onclick=e=>{ if(e.target===document.getElementById('deleteOverlay')){ document.getElementById('deleteOverlay').classList.remove('open'); delId=null; } };
+
+// ── INIT ───────────────────────────────────────────────
+buildSidebar(); buildForm(); renderCards();
+if(!db.length){
+  db=[
+    {id:'s1',p:1,s:'Contoh 1',judul:'Hello World',desc:'Program HTML pertama',t:'html',kode:'<!DOCTYPE html>\n<html lang="id">\n<head><meta charset="UTF-8"/><title>Hello World</title></head>\n<body>\n  <h1 style="color:hotpink">Hello, World! \uD83C\uDF38</h1>\n  <p>Selamat datang di Java Web Programming!</p>\n</body>\n</html>'},
+    {id:'s2',p:1,s:'Latihan 1',judul:'Tabel Sederhana',desc:'Latihan membuat tabel HTML',t:'html',kode:'<!DOCTYPE html>\n<html><head><meta charset="UTF-8"/></head>\n<body>\n<h2>Data Mahasiswa</h2>\n<table border="1" cellpadding="8">\n  <tr><th>No</th><th>Nama</th><th>NIM</th></tr>\n  <tr><td>1</td><td>Dini Nurul Fauziah</td><td>241091750091</td></tr>\n</table>\n</body></html>'},
+    {id:'s3',p:2,s:'Contoh 1',judul:'Tombol Interaktif',desc:'Event onclick JavaScript',t:'html',kode:'<!DOCTYPE html>\n<html><head><meta charset="UTF-8"/></head>\n<body>\n<button onclick="sapa()" style="padding:10px 20px;background:hotpink;color:white;border:none;border-radius:8px;cursor:pointer">Sapa Aku!</button>\n<p id="pesan"></p>\n<script>\nfunction sapa(){\n  document.getElementById(\'pesan\').textContent=\'Halo, Dini! \uD83C\uDF38\';\n}\n<\/script>\n</body></html>'}
+  ];
+  saveDB();
+}
+</script>
+</body>
+</html>
